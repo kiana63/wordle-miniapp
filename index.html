@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle فارسی جذاب</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            direction: rtl;
+            margin: 0;
+            color: #fff;
+        }
+        h1 {
+            font-size: 2.8em;
+            margin: 25px 0;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+        }
+        .main-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+        }
+        .row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+        .tile {
+            width: 65px;
+            height: 65px;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            font-weight: bold;
+            border-radius: 10px;
+            text-transform: uppercase;
+            transition: transform 0.5s, background-color 0.3s;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+        .tile.correct {
+            background-color: #6aaa64;
+            color: white;
+            animation: flip 0.5s ease;
+        }
+        .tile.present {
+            background-color: #c9b458;
+            color: white;
+            animation: flip 0.5s ease;
+        }
+        .tile.absent {
+            background-color: #787c7e;
+            color: white;
+            animation: flip 0.5s ease;
+        }
+        .tile.empty {
+            background-color: #ffffff;
+        }
+        @keyframes flip {
+            0% { transform: rotateX(0); }
+            50% { transform: rotateX(90deg); }
+            100% { transform: rotateX(0); }
+        }
+        input {
+            margin-top: 25px;
+            padding: 12px;
+            font-size: 20px;
+            border: none;
+            border-radius: 8px;
+            width: 220px;
+            text-align: center;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+        }
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        button {
+            margin-top: 15px;
+            padding: 12px 25px;
+            font-size: 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background-color: #c0392b;
+        }
+        .stats {
+            margin-top: 20px;
+            font-size: 22px;
+            font-weight: bold;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+        }
+        .legend {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+            text-align: right;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Wordle فارسی</h1>
+    <div class="main-container">
+        <div id="game" class="game-container"></div>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #6aaa64;"></div>
+                <span>حرف درست در جای درست</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #c9b458;"></div>
+                <span>حرف درست در جای غلط</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #787c7e;"></div>
+                <span>حرف اشتباه</span>
+            </div>
+        </div>
+    </div>
+    <input type="text" id="guess-input" placeholder="حدست رو بنویس">
+    <button onclick="submitGuess()">ارسال</button>
+    <div id="stats" class="stats">تلاش‌ها: ۰ از ۵</div>
+    <div id="message" class="message"></div>
+
+    <script>
+        const wordList = {
+            5: ["سلام", "جهان", "کتاب", "مدرسه", "خورشید"],
+            6: ["ممنوع", "دریاچه", "تصویر", "شگفت", "پرنده"],
+            7: ["زیباگر", "مسابقه", "خاطرات", "دانشجو", "هواپیما"]
+        };
+        const maxGuesses = 5;
+        let currentGuess = '';
+        let guessCount = 0;
+        let wordLength = Math.floor(Math.random() * 3) + 5; // 5، 6 یا 7
+        let targetWord = wordList[wordLength][Math.floor(Math.random() * wordList[wordLength].length)];
+        let gameOver = false;
+
+        // تنظیم اولیه ورودی
+        const input = document.getElementById('guess-input');
+        input.setAttribute('maxlength', wordLength); // محدودیت تعداد کاراکتر
+
+        // فیلتر کردن ورودی برای فقط حروف فارسی
+        input.addEventListener('input', (e) => {
+            const persianRegex = /^[\u0600-\u06FF\s]*$/; // رنج حروف فارسی در یونیکد
+            if (!persianRegex.test(e.target.value)) {
+                e.target.value = e.target.value.replace(/[^\u0600-\u06FF\s]/g, '');
+            }
+        });
+
+        function initGame() {
+            const gameContainer = document.getElementById('game');
+            for (let i = 0; i < maxGuesses; i++) {
+                const row = document.createElement('div');
+                row.className = 'row';
+                for (let j = 0; j < wordLength; j++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile empty';
+                    row.appendChild(tile);
+                }
+                gameContainer.appendChild(row);
+            }
+        }
+
+        function submitGuess() {
+            if (gameOver) return;
+
+            currentGuess = input.value.trim();
+            if (currentGuess.length !== wordLength) {
+                document.getElementById('message').textContent = `کلمه باید ${wordLength} حرفی باشه!`;
+                return;
+            }
+
+            const rows = document.getElementsByClassName('row');
+            const tiles = rows[guessCount].getElementsByClassName('tile');
+
+            for (let i = 0; i < wordLength; i++) {
+                tiles[i].textContent = currentGuess[i];
+                tiles[i].style.animation = 'none'; // ریست انیمیشن
+                setTimeout(() => {
+                    if (currentGuess[i] === targetWord[i]) {
+                        tiles[i].className = 'tile correct';
+                    } else if (targetWord.includes(currentGuess[i])) {
+                        tiles[i].className = 'tile present';
+                    } else {
+                        tiles[i].className = 'tile absent';
+                    }
+                }, 100 * i); // تاخیر برای هر کاشی
+            }
+
+            guessCount++;
+            document.getElementById('stats').textContent = `تلاش‌ها: ${guessCount} از ${maxGuesses}`;
+            input.value = '';
+            input.focus(); // فوکوس دوباره به ورودی
+
+            if (currentGuess === targetWord) {
+                setTimeout(() => {
+                    document.getElementById('message').textContent = 'تبریک! برنده شدی!';
+                    gameOver = true;
+                }, 600);
+            } else if (guessCount === maxGuesses) {
+                setTimeout(() => {
+                    document.getElementById('message').textContent = `بازی تموم شد! کلمه: ${targetWord}`;
+                    gameOver = true;
+                }, 600);
+            } else {
+                document.getElementById('message').textContent = '';
+            }
+        }
+
+        document.getElementById('guess-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') submitGuess();
+        });
+
+        initGame();
+    </script>
+</body>
+</html>
