@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wordle فارسی جذاب</title>
+    <title>Wordle فارسی</title>
     <style>
         body {
             display: flex;
@@ -15,39 +15,109 @@
             direction: rtl;
             margin: 0;
             color: #fff;
+            overflow-x: hidden;
         }
         h1 {
-            font-size: 2.8em;
-            margin: 25px 0;
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            margin: clamp(15px, 3vh, 25px) 0;
             text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .username {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: #e74c3c;
+            font-weight: bold;
         }
         .main-container {
             display: flex;
-            gap: 20px;
-            align-items: flex-start;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+        .legend {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: clamp(10px, 2vw, 15px);
+            border-radius: 10px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+            text-align: right;
+            width: clamp(300px, 70%, 600px);
+            position: relative;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            margin-bottom: clamp(10px, 2vh, 20px);
+        }
+        .legend.hidden {
+            opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+            height: 0;
+            padding: 0;
+            margin-bottom: 0;
+            overflow: hidden;
+        }
+        .legend-content {
+            font-size: clamp(14px, 3vw, 16px);
+            line-height: 1.5;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: clamp(5px, 1vw, 10px);
+            margin: clamp(5px, 1vh, 10px) 0;
+            font-size: clamp(14px, 3vw, 18px);
+        }
+        .legend-color {
+            width: clamp(20px, 5vw, 30px);
+            height: clamp(20px, 5vw, 30px);
+            border-radius: 5px;
+        }
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: clamp(14px, 3vw, 18px);
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .close-btn:hover {
+            color: #e74c3c;
         }
         .game-container {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: clamp(5px, 1vw, 8px);
             background-color: rgba(255, 255, 255, 0.15);
-            padding: 25px;
+            padding: clamp(15px, 3vw, 25px);
             border-radius: 20px;
             box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+            width: clamp(300px, 70%, 600px);
+            transition: margin-top 0.3s ease;
+        }
+        .game-container.expanded {
+            margin-top: -clamp(10px, 2vh, 20px);
         }
         .row {
             display: flex;
             justify-content: center;
-            gap: 8px;
+            gap: clamp(5px, 1vw, 8px);
         }
         .tile {
-            width: 65px;
-            height: 65px;
+            width: clamp(40px, 10vw, 65px);
+            height: clamp(40px, 10vw, 65px);
             background-color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
+            font-size: clamp(20px, 5vw, 30px);
             font-weight: bold;
             border-radius: 10px;
             text-transform: uppercase;
@@ -78,73 +148,109 @@
             100% { transform: rotateX(0); }
         }
         input {
-            margin-top: 25px;
-            padding: 12px;
-            font-size: 20px;
+            margin-top: clamp(15px, 3vh, 25px);
+            padding: clamp(8px, 2vw, 12px);
+            font-size: clamp(16px, 4vw, 20px);
             border: none;
             border-radius: 8px;
-            width: 220px;
+            width: clamp(150px, 50vw, 220px);
             text-align: center;
             box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
             transition: all 0.3s;
         }
-        input:focus {
+        input:focus, button:focus {
             outline: none;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 10px #6aaa64;
         }
         button {
-            margin-top: 15px;
-            padding: 12px 25px;
-            font-size: 20px;
+            margin-top: clamp(10px, 2vh, 15px);
+            padding: clamp(8px, 2vw, 12px) clamp(15px, 3vw, 25px);
+            font-size: clamp(16px, 4vw, 20px);
             background-color: #e74c3c;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, box-shadow 0.3s;
             box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
         }
         button:hover {
             background-color: #c0392b;
         }
         .stats {
-            margin-top: 20px;
-            font-size: 22px;
+            margin-top: clamp(15px, 3vh, 20px);
+            font-size: clamp(18px, 4vw, 22px);
             font-weight: bold;
             text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
         }
         .message {
-            margin-top: 20px;
-            font-size: 24px;
+            margin-top: clamp(15px, 3vh, 20px);
+            font-size: clamp(20px, 5vw, 24px);
             font-weight: bold;
             text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
         }
-        .legend {
-            background-color: rgba(255, 255, 255, 0.15);
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
-            text-align: right;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 10px 0;
-            font-size: 18px;
-        }
-        .legend-color {
-            width: 30px;
-            height: 30px;
+        .show-legend-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: clamp(5px, 1vw, 10px);
+            font-size: clamp(14px, 3vw, 16px);
+            background-color: #6aaa64;
+            color: white;
+            border: none;
             border-radius: 5px;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s;
+            z-index: 1000;
+        }
+        .show-legend-btn:hover {
+            background-color: #5a8e56;
+        }
+        .warning {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(255, 0, 0, 0.9);
+            color: white;
+            padding: clamp(8px, 2vw, 10px) clamp(15px, 3vw, 20px);
+            border-radius: 5px;
+            font-size: clamp(16px, 4vw, 18px);
+            font-weight: bold;
+            display: none;
+            animation: blink 0.5s infinite;
+            z-index: 1000;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        @media (max-width: 600px) {
+            .legend, .game-container {
+                width: 100%;
+            }
+            .show-legend-btn {
+                top: 10px;
+                right: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Wordle فارسی</h1>
+    <h1>
+        Wordle فارسی
+        <span class="username" id="username"></span>
+    </h1>
+    <div class="warning" id="warning">فقط حروف فارسی مجاز است!</div>
     <div class="main-container">
-        <div id="game" class="game-container"></div>
-        <div class="legend">
+        <div class="legend" id="legend">
+            <button class="close-btn" onclick="toggleLegend()">✕</button>
+            <div class="legend-content">
+                این بازی حدس کلمه است که در آن باید کلمه‌ای مخفی را پیدا کنید. کلمه بین ۵ تا ۷ حرف دارد و شما ۵ فرصت برای حدس زدن دارید. با حدس درست کلمه، برنده می‌شوید!
+            </div>
             <div class="legend-item">
                 <div class="legend-color" style="background-color: #6aaa64;"></div>
                 <span>حرف درست در جای درست</span>
@@ -158,35 +264,59 @@
                 <span>حرف اشتباه</span>
             </div>
         </div>
+        <div id="game" class="game-container"></div>
     </div>
+    <button class="show-legend-btn" id="show-legend-btn" onclick="toggleLegend()">نمایش راهنما</button>
     <input type="text" id="guess-input" placeholder="حدست رو بنویس">
     <button onclick="submitGuess()">ارسال</button>
     <div id="stats" class="stats">تلاش‌ها: ۰ از ۵</div>
     <div id="message" class="message"></div>
 
+    <script src="https://tapi.bale.ai/miniapp.js?1"></script>
     <script>
+        window.Bale.WebApp.ready();
+	window.Bale.WebApp.expand();
+        const userFirstName = window.Bale.WebApp.initDataUnsafe.user?.first_name || "کاربر";
+        document.getElementById('username').textContent = `- ${userFirstName}`;
+
         const wordList = {
             5: ["سلام", "جهان", "کتاب", "مدرسه", "خورشید"],
             6: ["ممنوع", "دریاچه", "تصویر", "شگفت", "پرنده"],
             7: ["زیباگر", "مسابقه", "خاطرات", "دانشجو", "هواپیما"]
         };
         const maxGuesses = 5;
+        const minGuessInterval = 1000;
         let currentGuess = '';
         let guessCount = 0;
-        let wordLength = Math.floor(Math.random() * 3) + 5; // 5، 6 یا 7
+        let wordLength = Math.floor(Math.random() * 3) + 5;
         let targetWord = wordList[wordLength][Math.floor(Math.random() * wordList[wordLength].length)];
         let gameOver = false;
+        let lastGuessTime = 0;
 
-        // تنظیم اولیه ورودی
         const input = document.getElementById('guess-input');
-        input.setAttribute('maxlength', wordLength); // محدودیت تعداد کاراکتر
+        input.setAttribute('maxlength', wordLength);
 
-        // فیلتر کردن ورودی برای فقط حروف فارسی
         input.addEventListener('input', (e) => {
-            const persianRegex = /^[\u0600-\u06FF\s]*$/; // رنج حروف فارسی در یونیکد
+            const persianRegex = /^[\u0600-\u06FF\s]*$/;
+            const warning = document.getElementById('warning');
             if (!persianRegex.test(e.target.value)) {
                 e.target.value = e.target.value.replace(/[^\u0600-\u06FF\s]/g, '');
+                warning.style.display = 'block';
+                setTimeout(() => {
+                    warning.style.display = 'none';
+                }, 2000);
             }
+        });
+
+        input.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const warning = document.getElementById('warning');
+            warning.textContent = 'کپی و چسباندن مجاز نیست!';
+            warning.style.display = 'block';
+            setTimeout(() => {
+                warning.style.display = 'none';
+                warning.textContent = 'فقط حروف فارسی مجاز است!';
+            }, 2000);
         });
 
         function initGame() {
@@ -203,8 +333,49 @@
             }
         }
 
+        function logGuessToConsole(guess, target) {
+            const result = {
+                guessNumber: guessCount,
+                word: guess,
+                result: guess.split('').map((char, index) => ({
+                    letter: char,
+                    status: char === target[index] ? 'true' : target.includes(char) ? 'false' : 'none'
+                })),
+                gameStatus: guess === target ? 'won' : guessCount === maxGuesses ? 'lost' : 'ongoing'
+            };
+            console.log(JSON.stringify(result, null, 2));
+            // ارسال JSON به ربات تلگرام
+            window.Telegram.WebApp.sendData(JSON.stringify(result));
+        }
+
+        function toggleLegend() {
+            const legend = document.getElementById('legend');
+            const showLegendBtn = document.getElementById('show-legend-btn');
+            const gameContainer = document.getElementById('game');
+            if (legend.classList.contains('hidden')) {
+                legend.classList.remove('hidden');
+                gameContainer.classList.remove('expanded');
+                showLegendBtn.style.display = 'none';
+            } else {
+                legend.classList.add('hidden');
+                gameContainer.classList.add('expanded');
+                setTimeout(() => {
+                    showLegendBtn.style.display = 'block';
+                }, 300);
+            }
+        }
+
         function submitGuess() {
             if (gameOver) return;
+
+            const now = Date.now();
+            if (now - lastGuessTime < minGuessInterval) {
+                document.getElementById('message').textContent = 'لطفاً کمی صبر کنید قبل از حدس بعدی!';
+                setTimeout(() => {
+                    document.getElementById('message').textContent = '';
+                }, 1000);
+                return;
+            }
 
             currentGuess = input.value.trim();
             if (currentGuess.length !== wordLength) {
@@ -217,7 +388,7 @@
 
             for (let i = 0; i < wordLength; i++) {
                 tiles[i].textContent = currentGuess[i];
-                tiles[i].style.animation = 'none'; // ریست انیمیشن
+                tiles[i].style.animation = 'none';
                 setTimeout(() => {
                     if (currentGuess[i] === targetWord[i]) {
                         tiles[i].className = 'tile correct';
@@ -226,13 +397,15 @@
                     } else {
                         tiles[i].className = 'tile absent';
                     }
-                }, 100 * i); // تاخیر برای هر کاشی
+                }, 100 * i);
             }
 
             guessCount++;
+            lastGuessTime = now;
             document.getElementById('stats').textContent = `تلاش‌ها: ${guessCount} از ${maxGuesses}`;
+            logGuessToConsole(currentGuess, targetWord);
             input.value = '';
-            input.focus(); // فوکوس دوباره به ورودی
+            input.focus();
 
             if (currentGuess === targetWord) {
                 setTimeout(() => {
