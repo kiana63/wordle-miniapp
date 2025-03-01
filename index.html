@@ -276,6 +276,7 @@
     <script>
         window.Bale.WebApp.ready();
 	window.Bale.WebApp.expand();
+	window.Bale.WebApp.enableClosingConfirmation()	
         const userFirstName = window.Bale.WebApp.initDataUnsafe.user?.first_name || "کاربر";
         document.getElementById('username').textContent = `- ${userFirstName}`;
 
@@ -345,7 +346,7 @@
             };
             console.log(JSON.stringify(result, null, 2));
             // ارسال JSON به ربات تلگرام
-            window.Telegram.WebApp.sendData(JSON.stringify(result));
+            //window.Telegram.WebApp.sendData(JSON.stringify(result));
         }
 
         function toggleLegend() {
